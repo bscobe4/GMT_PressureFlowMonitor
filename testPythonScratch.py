@@ -23,24 +23,26 @@ try:
     #        print ("6 ADC = %lf"%(ADC_Value[6]*5.0/0x7fffff)) #flow sensor 1
     #        print ("7 ADC = %lf"%(ADC_Value[7]*5.0/0x7fffff)) #flow sensor 2 (if used)
     #        print ("\33[9A")
-    needHeader = True  # To indicate if header needs to be written
+    row = 0  # To indicate if header needs to be written
 
-    while (1):
-        #ADC_Value = ADC.ADS1256_GetAll()
-        ADC_Value = [0x0fffff, 0x1fffff, 0x2fffff, 0x3fffff, 0x4fffff, 0x5fffff, 0x6fffff, 0x7fffff]
-        with open('pressureFlowData.csv', 'w', newline='') as csvfile:
-            dataWriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            if ~needHeader:
-                dataWriter.writerow(
-                    ['Rod 1'] + ['Back 1'] + ['Rod 2'] + ['Back 2'] + ['Rod 3'] + ['Back 3'] + ['Flow 1'] + [
-                        'Flow 2'])  # write header
-                needHeader = False  # toggle to show that header has been written
-
-            #dataWriter.writerow(
-            #    ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
-            #        '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
-            #        '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
-            #        '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)])
+    #while (row <= 4):
+    #ADC_Value = ADC.ADS1256_GetAll()
+    #ADC_Value = [0x0fffff, 0x1fffff, 0x2fffff, 0x3fffff, 0x4fffff, 0x5fffff, 0x6fffff, 0x7fffff]
+    with open('pressureFlowData.csv', 'w', newline='') as csvfile:
+        dataWriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        if row == 0:
+            dataWriter.writerow(
+                ['Rod 1'] + ['Back 1'] + ['Rod 2'] + ['Back 2'] + ['Rod 3'] + ['Back 3'] + ['Flow 1'] + [
+                    'Flow 2'])  # write header
+            row += 1  # toggle to show that header has been written
+        while (row <= 4):
+            ADC_Value = [0x0fffff+row, 0x1fffff+row, 0x2fffff+row, 0x3fffff+row, 0x4fffff+row, 0x5fffff+row, 0x6fffff+row, 0x7fffff+row]
+            dataWriter.writerow(
+                ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
+                    '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
+                    '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
+                    '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)])
+            row += 1
 
 
 except:

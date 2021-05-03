@@ -3,7 +3,7 @@
 
 
 import time
-import csv  # to write to csv file for afs
+import csv  # to write to csv file for nfs
 import ADS1256
 import RPi.GPIO as GPIO
 

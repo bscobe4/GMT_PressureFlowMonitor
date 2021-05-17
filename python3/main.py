@@ -1,11 +1,15 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-
+import os
 import time
 import csv  # to write to csv file for nfs
 import ADS1256
 import RPi.GPIO as GPIO
+
+workpath = '/home/pi/Documents/GMT_PressFlowMonitor/python3/'
+
+os.chdir(os.path.dirname(workpath))
 
 try:
     ADC = ADS1256.ADS1256()
@@ -26,7 +30,7 @@ try:
     row = 0  # To indicate if header needs to be written
     numRows = 10
 
-    with open('pressureFlowData.csv', 'w', newline='') as csvfile:
+    with open('output/pressureFlowData.csv', 'w', newline='') as csvfile:
         dataWriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         if row == 0:
             dataWriter.writerow(
@@ -35,13 +39,16 @@ try:
             row += 1  # toggle to show that header has been written
         while (row <= numRows): #DEBUG replace with GPIO trigger
             ADC_Value = ADC.ADS1256_GetAll()
+            
             dataWriter.writerow(
                 ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)])
+            print ("0 ADC = %lf"%(ADC_Value[0]*5.0/0x7fffff))
             row += 1
-
+            csvfile.flush()
+            time.sleep(1)
 
 except:
     GPIO.cleanup()

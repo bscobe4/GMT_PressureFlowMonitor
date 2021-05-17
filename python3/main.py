@@ -45,7 +45,7 @@ try:
                     '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)])
-            print ("0 ADC = %lf"%(ADC_Value[0]*5.0/0x7fffff))
+            
             row += 1
             csvfile.flush()
             time.sleep(1)

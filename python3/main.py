@@ -10,6 +10,11 @@ import ADS1256
 import RPi.GPIO as GPIO
 import keyboard
 
+import sys
+import select
+import tty
+import termios
+
 workpath = '/home/pi/Documents/GMT_PressFlowMonitor/python3/'
 slowFile = 'output/slowPFMdata.csv'
 fastFile = 'output/fastPFMdata.csv'
@@ -22,25 +27,31 @@ startFast = False
 keyListen_fastLog = True
 escape = False
 
+#**Function Definitions**
 def key_press(key):
   print(key.name)
   if key.name == "esc":
     escape = True
   if key.name == "ctrl+f":
     startFast = True
-  
+
+def isData(): #keypress-function to know if there is input available
+  return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []) #keypress
 
 os.chdir(os.path.dirname(workpath))
 
+old_settings = termios.tcgetattr(sys.stdin) #keypress-save terminal settings
+
 try:
+    tty.setcbreak(sys.stdin.fileno()) #keypress- set the terminal to character input mode
     ADC = ADS1256.ADS1256()
     ADC.ADS1256_init()
 
-
     timeStart = time.time()
-
+    print("debug1")
     with open(slowFile, 'w', newline='') as csvfile:
         dataWriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        print("debug2")
         
         if row == 0:
             dataWriter.writerow(
@@ -48,7 +59,7 @@ try:
                     'Flow 2'] + ['Time (s)'])  # write header
             row += 1  # toggle to show that header has been written
         #while (row <= numRows): #DEBUG replace with GPIO trigger
-        
+        print("debug3")
         while isLogging:
             ADC_Value = ADC.ADS1256_GetAll()
             timeDelta = time.time() - timeStart
@@ -62,14 +73,23 @@ try:
             row += 1
             csvfile.flush()
             
-            keyboard.on_press(key_press)
+            #keyboard.on_press(key_press)
+            
+            #keypress- listen for input
+            if isData():
+              c = sys.stdin.read(1)
+              if c == '\x1b': #esc key
+                #break
+                escape = True
             
             if escape:
               isLogging = False
+              print("esc")
             
             if not startFast:
               time.sleep(1)  #1 Hz
             else:
+              print("debug startfast")
               subprocess.Popen("python3", "fastLogging.py") #can't interact with this subprocess
               startFast = False
               time.sleep(1)
@@ -79,4 +99,5 @@ try:
 except:
     GPIO.cleanup()
     print("\r\nProgram end     ")
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings) #keypress-restore console state
     exit()

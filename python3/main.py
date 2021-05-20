@@ -19,9 +19,11 @@ fastFile = 'output/fastPFMdata.csv'
 
 KEY_ESC = '\x1b'
 KEY_FAST = 'f'
+KEY_DURATION = 'd'
+HELPMSG ='\n*************************************************************************\nPress "f" to start fast logging. A unique timestamped file will be created. Only one fast logging process can run at a time. \nPress "d" during fast logging to set its duration in seconds (default is infinite) \nPress ESC to stop fast logging \nPress ESC again to exit pressure & flow monitor \n*************************************************************************'
 
 row = 0  # To indicate if header needs to be written
-numRows = 10
+fastLoggingTime = 10
 isLogging = True
 startFast = False
 
@@ -29,12 +31,6 @@ keyListen_fastLog = True
 escape = False
 
 #**Function Definitions**
-def key_press(key):
-  print(key.name)
-  if key.name == "esc":
-    escape = True
-  if key.name == "ctrl+f":
-    startFast = True
 
 def isData(): #keypress-function to know if there is input available
   return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []) #keypress
@@ -44,6 +40,7 @@ os.chdir(os.path.dirname(workpath))
 old_settings = termios.tcgetattr(sys.stdin) #keypress-save terminal settings
 
 try:
+    print(HELPMSG)
     tty.setcbreak(sys.stdin.fileno()) #keypress- set the terminal to character input mode
     ADC = ADS1256.ADS1256()
     ADC.ADS1256_init()
@@ -82,7 +79,7 @@ try:
               if c == KEY_ESC: #esc key
                 escape = True
               if c == KEY_FAST: #f key
-                startFast = True
+                startFast = True              
             
             if escape:
               isLogging = False
@@ -106,3 +103,4 @@ except:
 finally:
       termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings) #keypress-restore console state
       print("exited pressure & flow monitor (exited)")
+      exit()

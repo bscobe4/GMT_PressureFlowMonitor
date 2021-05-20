@@ -12,15 +12,18 @@ import sys
 import select
 import tty
 import termios
+import configparser
 
 workpath = '/home/pi/Documents/GMT_PressFlowMonitor/python3/'
 slowFile = 'output/slowPFMdata.csv'
 fastFile = 'output/fastPFMdata.csv'
+outputpath = workpath #default outputpath
+
 
 KEY_ESC = '\x1b'
 KEY_FAST = 'f'
 KEY_DURATION = 'd'
-HELPMSG ='\n*************************************************************************\nPress "f" to start fast logging. A unique timestamped file will be created. Only one fast logging process can run at a time. \nPress "d" during fast logging to set its duration in seconds (default is infinite) \nPress ESC to stop fast logging \nPress ESC again to exit pressure & flow monitor \n*************************************************************************'
+HELPMSG ='\n*************************************************************************\nPress "f" to start fast logging. A unique timestamped file will be created. Only one fast logging process can run at a time. \nThe duration of fast logging is set in PFMconfig.ini (if no config found, set to default) \nPress ESC to stop fast logging \nPress ESC again to exit pressure & flow monitor \n*************************************************************************'
 
 row = 0  # To indicate if header needs to be written
 fastLoggingTime = 10
@@ -41,6 +44,10 @@ old_settings = termios.tcgetattr(sys.stdin) #keypress-save terminal settings
 
 try:
     print(HELPMSG)
+    config = configparser.ConfigParser()
+    config.read('PFMconfig.ini')
+    outputpath = config['DEFAULT']['outputAddress']#workpath #debug- need to read from config file later
+    slowfile = outputpath + slowFile
     tty.setcbreak(sys.stdin.fileno()) #keypress- set the terminal to character input mode
     ADC = ADS1256.ADS1256()
     ADC.ADS1256_init()

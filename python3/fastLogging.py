@@ -19,6 +19,7 @@ fastFile = 'output/fastPFMdata'
 
 KEY_ESC = '\x1b'
 
+
 row = 0  # To indicate if header needs to be written
 numRows = 10
 isLogging = True
@@ -78,10 +79,8 @@ try:
             if escape:
               isLogging = False
             
-            if not fastLogging:
-              time.sleep(1)  #1 Hz
-            else:
-              time.sleep(0.001)  #1kHz *DEBUG: this implementation only leads to about 20 Hz real-time
+
+            #time.sleep(0.001)  #1kHz *DEBUG: this implementation only leads to about 20 Hz real-time
 
 
 except:
@@ -93,3 +92,4 @@ except:
 finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
         print("fastLogging end (exited)")
+        exit()

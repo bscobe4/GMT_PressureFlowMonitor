@@ -12,10 +12,13 @@ import sys
 import select
 import tty
 import termios
+import configparser
 
 workpath = '/home/pi/Documents/GMT_PressFlowMonitor/python3/'
 slowFile = 'output/slowPFMdata.csv'
 fastFile = 'output/fastPFMdata'
+outputpath = workpath #default outputpath
+fastLogDuration = 60 #defailt fast logging duration
 
 KEY_ESC = '\x1b'
 
@@ -35,6 +38,10 @@ os.chdir(os.path.dirname(workpath))
 old_settings = termios.tcgetattr(sys.stdin) #keypress
 
 try:
+    config = configparser.ConfigParser()
+    config.read('PFMconfig.ini')
+    outputpath = config['DEFAULT']['outputAddress']#workpath #debug- need to read from config file later
+    fastLogDuration = float(config['DEFAULT']['fastLogDuration'])
     tty.setcbreak(sys.stdin.fileno()) #keypress
     
     ADC = ADS1256.ADS1256()
@@ -44,7 +51,7 @@ try:
     timeStart = time.time()
     dNow = datetime.now()
     strDate = dNow.strftime("%m-%d-%Y_%H:%M:%S")
-    fastFile = fastFile + strDate + '.csv'
+    fastFile = outputpath + fastFile + strDate + '.csv'
     
     
 
@@ -75,9 +82,13 @@ try:
               if c == KEY_ESC: #esc key
                 escape = True
                 print("esc fastLog") #debug
-            
+
+            if timeDelta > fastLogDuration:
+              escape = True
+                          
             if escape:
               isLogging = False
+              
             
 
             #time.sleep(0.001)  #1kHz *DEBUG: this implementation only leads to about 20 Hz real-time

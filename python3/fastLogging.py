@@ -21,6 +21,7 @@ outputpath = workpath #default outputpath
 fastLogDuration = 60 #defailt fast logging duration
 
 KEY_ESC = '\x1b'
+DRATE_1000SPS = 0xA1
 
 
 row = 0  # To indicate if header needs to be written
@@ -85,7 +86,7 @@ try:
 
             if timeDelta > fastLogDuration:
               escape = True
-                          
+              
             if escape:
               isLogging = False
               

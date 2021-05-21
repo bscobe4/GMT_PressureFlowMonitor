@@ -23,7 +23,7 @@ outputpath = workpath #default outputpath
 KEY_ESC = '\x1b'
 KEY_FAST = 'f'
 KEY_DURATION = 'd'
-HELPMSG ='\n*************************************************************************\nPress "f" to start fast logging. A unique timestamped file will be created. Only one fast logging process can run at a time. \nThe duration of fast logging is set in PFMconfig.ini (if no config found, set to default) \nPress ESC to stop fast logging \nPress ESC again to exit pressure & flow monitor \n*************************************************************************'
+HELPMSG ='\nPressure & Flow Monitor Help\n*************************************************************************\nPress "f" to start fast logging. A unique timestamped file will be created. Only one fast logging process can run at a time. \nThe duration of fast logging is set in PFMconfig.ini (if no config found, set to default) \nPress ESC to stop fast logging \nPress ESC again to exit pressure & flow monitor \n*************************************************************************'
 
 row = 0  # To indicate if header needs to be written
 fastLoggingTime = 10

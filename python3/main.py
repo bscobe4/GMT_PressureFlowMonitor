@@ -47,7 +47,7 @@ try:
     config = configparser.ConfigParser()
     config.read('PFMconfig.ini')
     outputpath = config['DEFAULT']['outputAddress']#workpath #debug- need to read from config file later
-    slowfile = outputpath + slowFile
+    slowFile = outputpath + slowFile
     tty.setcbreak(sys.stdin.fileno()) #keypress- set the terminal to character input mode
     ADC = ADS1256.ADS1256()
     ADC.ADS1256_init()

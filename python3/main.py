@@ -2,12 +2,12 @@
 # -*- coding:utf-8 -*-
 
 import os
-import subprocess
 import time
 import csv  # to write to csv file for nfs
 import ADS1256
 import RPi.GPIO as GPIO
 import keyboard
+from datetime import datetime
 import sys
 import select
 import tty
@@ -15,10 +15,10 @@ import termios
 import configparser
 
 workpath = '/home/pi/Documents/GMT_PressFlowMonitor/python3/'
-slowFile = 'output/slowPFMdata.csv'
-fastFile = 'output/fastPFMdata.csv'
+slowFile = 'output/slowPFMdata'
+fastFile = 'output/fastPFMdata'
 outputpath = workpath #default outputpath
-
+fastLogDuration = 60 #defailt fast logging duration
 
 KEY_ESC = '\x1b'
 KEY_FAST = 'f'
@@ -26,6 +26,7 @@ KEY_DURATION = 'd'
 HELPMSG ='\nPressure & Flow Monitor Help\n*************************************************************************\nPress "f" to start fast logging. A unique timestamped file will be created. Only one fast logging process can run at a time. \nThe duration of fast logging is set in PFMconfig.ini (if no config found, set to default) \nPress ESC to stop fast logging \nPress ESC again to exit pressure & flow monitor \n*************************************************************************'
 
 row = 0  # To indicate if header needs to be written
+fastrow = 0
 fastLoggingTime = 10
 isLogging = True
 startFast = False
@@ -53,18 +54,20 @@ try:
     ADC.ADS1256_init()
 
     timeStart = time.time()
-    #print("debug1")
-    with open(slowFile, 'w', newline='') as csvfile:
-        dataWriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        #print("debug2")
-        
+    dNow = datetime.now()
+    strDate = dNow.strftime("%m-%d-%Y_%H:%M:%S")
+    fastFile = outputpath + fastFile + strDate + '.csv'
+    
+    
+    
+    with open(slowFile, 'w', newline='') as, open (fastFile, 'w', newline='') as fastCSV:
+        dataWriter = csv.writer(slowCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         if row == 0:
             dataWriter.writerow(
                 ['Rod 1 (V)'] + ['Back 1 (V)'] + ['Rod 2 (V)'] + ['Back 2 (V)'] + ['Rod 3 (V)'] + ['Back 3 (V)'] + ['Flow 1 (V)'] + [
-                    'Flow 2'] + ['Time (s)'])  # write header
+                    'Flow 2 (V)'] + ['Time (s)'])  # write header
             row += 1  # toggle to show that header has been written
         #while (row <= numRows): #DEBUG replace with GPIO trigger
-        #print("debug3")
         while isLogging:
             ADC_Value = ADC.ADS1256_GetAll()
             timeDelta = time.time() - timeStart
@@ -76,9 +79,7 @@ try:
                     '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)] + ['%lf' % timeDelta])
             #print ("0 ADC = %lf"%(ADC_Value[0]*5.0/0x7fffff))
             row += 1
-            csvfile.flush()
-            
-            #keyboard.on_press(key_press)
+            slowCSV.flush()
             
             #keypress- listen for input
             if isData():

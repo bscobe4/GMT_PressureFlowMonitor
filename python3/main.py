@@ -45,25 +45,31 @@ old_settings = termios.tcgetattr(sys.stdin) #keypress-save terminal settings
 
 try:
     print(HELPMSG)
+    
     config = configparser.ConfigParser()
     config.read('PFMconfig.ini')
     outputpath = config['DEFAULT']['outputAddress']#workpath #debug- need to read from config file later
     slowFile = outputpath + slowFile
+    
     tty.setcbreak(sys.stdin.fileno()) #keypress- set the terminal to character input mode
+    
     ADC = ADS1256.ADS1256()
     ADC.ADS1256_init()
 
     timeStart = time.time()
     dNow = datetime.now()
     strDate = dNow.strftime("%m-%d-%Y_%H:%M:%S")
-    fastFile = outputpath + fastFile + strDate + '.csv'
+    slowFile = outputpath + fastFile + strDate + '.csv'
     
     
     
-    with open(slowFile, 'w', newline='') as, open (fastFile, 'w', newline='') as fastCSV:
-        dataWriter = csv.writer(slowCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    with open(slowFile, 'w', newline='') as slowCSV, open (fastFile, 'w', newline='') as fastCSV:
+    
+        slowWriter = csv.writer(slowCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        fastWriter = csv.writer(fastCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        
         if row == 0:
-            dataWriter.writerow(
+            slowWriter.writerow(
                 ['Rod 1 (V)'] + ['Back 1 (V)'] + ['Rod 2 (V)'] + ['Back 2 (V)'] + ['Rod 3 (V)'] + ['Back 3 (V)'] + ['Flow 1 (V)'] + [
                     'Flow 2 (V)'] + ['Time (s)'])  # write header
             row += 1  # toggle to show that header has been written
@@ -72,7 +78,7 @@ try:
             ADC_Value = ADC.ADS1256_GetAll()
             timeDelta = time.time() - timeStart
             
-            dataWriter.writerow(
+            slowWriter.writerow(
                 ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
                     '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
@@ -96,11 +102,11 @@ try:
               time.sleep(1)  #1 Hz
             else:
               print("started fast logging")
-              fastLogProcess = subprocess.Popen(["python3", "fastLogging.py"]) #can't interact with this subprocess
+              #fastLogProcess = subprocess.Popen(["python3", "fastLogging.py"]) #can't interact with this subprocess
               startFast = False
-              time.sleep(1)
+              #time.sleep(1)
               
-              #time.sleep(0.001)  #1kHz *DEBUG: this implementation only leads to about 20 Hz real-time
+              time.sleep(0.001)  #1kHz *DEBUG: this implementation only leads to about 20 Hz real-time
 
 except:
     GPIO.cleanup()

@@ -74,8 +74,7 @@ try:
             slowWriter.writerow(
                 ['Rod 1 (V)'] + ['Back 1 (V)'] + ['Rod 2 (V)'] + ['Back 2 (V)'] + ['Rod 3 (V)'] + ['Back 3 (V)'] + ['Flow 1 (V)'] + [
                     'Flow 2 (V)'] + ['Time (s)'])  # write header
-            row += 1  # toggle to show that header has been written
-        #while (row <= numRows): #DEBUG replace with GPIO trigger
+            row += 1  # toggle to show that header has been written            
         
         while isLogging:
             ADC_Value = ADC.ADS1256_GetAll()
@@ -106,29 +105,27 @@ try:
             
             if isFast:
             
-              with open(fastFile, 'w', newline='') as fastCSV:
-              
-                if startFast:
-                  print('debug 2')
-                  fastRow = 0
-                  fastWriter = csv.writer(fastCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                  startFast = False
-                  fastWriter.writerow(
-                    ['Rod 1 (V)'] + ['Back 1 (V)'] + ['Rod 2 (V)'] + ['Back 2 (V)'] + ['Rod 3 (V)'] + ['Back 3 (V)'] + ['Flow 1 (V)'] + [
-                    'Flow 2 (V)'] + ['Time (s)'])  # write header
-                  fastrow += 1  # toggle to show that header has been written
-                  print('debug 3')
-                  
-                print('debug 4')
-
-              
-                #fastWriter.writerow(
-                #  ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
-                #    '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
-                #    '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
-                #    '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)] + ['%lf' % timeDelta])
-                fastrow += 1
-                fastCSV.flush()
+                with open(fastFile, 'w', newline='') as fastCSV:
+                    fastWriter = csv.writer(fastCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    if startFast:
+                        print('debug 2')
+                        fastRow = 0
+                        startFast = False
+                        fastWriter.writerow(
+                          ['Rod 1 (V)'] + ['Back 1 (V)'] + ['Rod 2 (V)'] + ['Back 2 (V)'] + ['Rod 3 (V)'] + ['Back 3 (V)'] + ['Flow 1 (V)'] + [
+                          'Flow 2 (V)'] + ['Time (s)'])  # write header
+                        fastrow += 1  # toggle to show that header has been written
+                        fastCSV.flush()
+                        print('debug 3')
+                        
+                    #print('debug 4')
+                    fastWriter.writerow(
+                      ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
+                        '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
+                        '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
+                        '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)] + ['%lf' % timeDelta])
+                    fastrow += 1
+                    fastCSV.flush()
 
             if isFast:
               if timeDelta - timeStartFast > fastLogDuration:

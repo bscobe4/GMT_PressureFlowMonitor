@@ -79,15 +79,9 @@ try:
         while isLogging:
             ADC_Value = ADC.ADS1256_GetAll()
             timeDelta = time.time() - timeStart
-            print('Delta')
+            #print('Delta')
             
-            if startFast:
-              dNow = datetime.now()
-              strDate = dNow.strftime("%m-%d-%Y_%H:%M:%S")
-              fastFile = outputpath + fastFile + strDate + '.csv'
-              fastLogDuration = float(config['DEFAULT']['fastLogDuration'])
-              timeStartFast = timeDelta
-              print("debug 1")
+
               
             
             if timeDelta-timeLast > 1:
@@ -101,14 +95,22 @@ try:
               slowCSV.flush()
             
             timeLast = timeDelta
-            print('timeLast')
+            #print('timeLast')
             
             if isFast:
+            
+                if startFast:
+                  dNow = datetime.now()
+                  strDate = dNow.strftime("%m-%d-%Y_%H:%M:%S")
+                  fastFile = outputpath + fastFile + strDate + '.csv'
+                  fastLogDuration = float(config['DEFAULT']['fastLogDuration'])
+                  timeStartFast = timeDelta
+                  #print("debug 1")
             
                 with open(fastFile, 'w', newline='') as fastCSV:
                     fastWriter = csv.writer(fastCSV, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
                     if startFast:
-                        print('debug 2')
+                        #print('debug 2')
                         fastRow = 0
                         startFast = False
                         fastWriter.writerow(
@@ -116,20 +118,51 @@ try:
                           'Flow 2 (V)'] + ['Time (s)'])  # write header
                         fastrow += 1  # toggle to show that header has been written
                         fastCSV.flush()
-                        print('debug 3')
+                        #print('debug 3')
                         
-                    #print('debug 4')
-                    fastWriter.writerow(
-                      ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
-                        '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
-                        '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
-                        '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)] + ['%lf' % timeDelta])
-                    fastrow += 1
-                    fastCSV.flush()
+                    while isFast:  
+                      ADC_Value = ADC.ADS1256_GetAll()
+                      timeDelta = time.time() - timeStart
+                      #print('Delta2')
+                      
+                      fastWriter.writerow(
+                        ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
+                          '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
+                          '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
+                          '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)] + ['%lf' % timeDelta])
+                      fastrow += 1
+                      fastCSV.flush()
+                      
+                      if timeDelta-timeLast > 1:
+                        slowWriter.writerow(
+                            ['%lf' % (ADC_Value[0] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[1] * 5.0 / 0x7fffff)] + [
+                                '%lf' % (ADC_Value[2] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[3] * 5.0 / 0x7fffff)] + [
+                                '%lf' % (ADC_Value[4] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[5] * 5.0 / 0x7fffff)] + [
+                                '%lf' % (ADC_Value[6] * 5.0 / 0x7fffff)] + ['%lf' % (ADC_Value[7] * 5.0 / 0x7fffff)] + ['%lf' % timeDelta])
+                        #print ("0 ADC = %lf"%(ADC_Value[0]*5.0/0x7fffff))
+                        row += 1
+                        slowCSV.flush()
+                        timeLast = timeDelta
+                        
+                      #print('timeLast')
 
-            if isFast:
-              if timeDelta - timeStartFast > fastLogDuration:
-                escape = True 
+                      if isFast:
+                        if timeDelta - timeStartFast > fastLogDuration:
+                          escape = True
+                      if isData():
+                        c = sys.stdin.read(1)
+                        if c == KEY_ESC: #esc key
+                          escape = True
+                      
+                      if escape:
+                        if not isFast:
+                          isLogging = False
+                        else:
+                          isFast = False
+                          escape = False
+                          fastFile = 'output/fastPFMdata'
+                          print("\r\nexited Fast Logging")
+                      
                         
             #keypress- listen for input
             if isData():
